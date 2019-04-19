@@ -1,0 +1,115 @@
+<title>Hello World Template</title>
+ 
+ <head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+	<!--<script src="static/js/input.js"></script>-->
+     
+     <script>
+         $(function(){
+            $('#process').click(function(){
+                $.ajax({
+                    url: '/predict',
+                    data: $('form').serialize(),
+                    type: 'POST',
+                    success: function(response){
+                        console.log(response);
+                        var json = JSON.parse(response);
+                        var text = ""
+                        if(json.value == 0)
+                            text = "Pronoun refers to target A";
+                        else if(json.value == 1)
+                            text = "Pronoun refers to target B";
+                        else
+                            text = "Pronoun refers to neither of targets"
+                        $('#answer').html(text);
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                    });
+                });
+                
+               $('#reset').click(function(){
+                    $('#answer').html("");
+                    $('#id_ta').val("");
+                    $('#id_tb').val("");
+                    $('#id_pronoun').val("");
+                    $('#id_ta_pos').val("");
+                    $('#id_tb_pos').val("");
+                    $('#id_pronoun_pos').val("");
+                    $('#id_content').val("");
+               });
+             
+               $('#select_a').click(function(){
+                     var start = $("#id_content")[0].selectionStart;
+                     var end = $("#id_content")[0].selectionEnd;
+                     var word = $("#id_content").val().substring(start, end)
+                     $('#id_ta').val(word)
+                     $('#id_ta_pos').val(start+1)
+               });
+             
+               $('#select_b').click(function(){
+                     var start = $("#id_content")[0].selectionStart;
+                     var end = $("#id_content")[0].selectionEnd;
+                     var word = $("#id_content").val().substring(start, end)
+                     $('#id_tb').val(word)
+                     $('#id_tb_pos').val(start+1)
+               });
+             
+               $('#select_pro').click(function(){
+                     var start = $("#id_content")[0].selectionStart;
+                     var end = $("#id_content")[0].selectionEnd;
+                     var word = $("#id_content").val().substring(start, end)
+                     $('#id_pronoun').val(word)
+                     $('#id_pronoun_pos').val(start+1)
+               });
+             
+               $('#test_load').click(function(){
+                     $.ajax({
+                    url: '/get_input',
+                    type: 'GET',
+                    success: function(response){
+                        console.log(response);
+                        var json = JSON.parse(response);
+                         $('#id_ta').val(json.target_a);
+                         $('#id_tb').val(json.target_b);
+                         $('#id_pronoun').val(json.pronoun);
+                         $('#id_ta_pos').val(json.target_a_pos);
+                         $('#id_tb_pos').val(json.target_b_pos);
+                         $('#id_pronoun_pos').val(json.pronoun_pos);
+                         $('#id_content').val(json.content);
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                    });
+               });
+             
+            });
+         
+     </script>
+ </head>
+<body>
+
+<div class="container">
+	<form id="process-form"  role="form">
+	<h2 class="form-process-heading">Pronoun resolution</h2><br/>
+	<textarea rows="4" cols="120" id="id_content" name="content" class="form-control" placeholder="Enter sentence here"></textarea> <br/>        <br/>
+    <button type="button" id="test_load">Load from test set</button><br/><br/>
+	Target A word:<input type="text"  id="id_ta" name="target_a" class="form-control"> 
+    Target A position:<input type="number"  id="id_ta_pos" name="target_a_pos" class="form-control">
+    <button type="button" id="select_a">Select A</button><br/><br/>
+	Target B word:<input type="text"  id="id_tb" name="target_b" class="form-control">
+    Target B position:<input type="number"  id="id_tb_pos" name="target_b_pos" class="form-control">
+    <button type="button" id="select_b">Select B</button><br/><br/>
+	Pronoun word: <input type="text"  id="id_pronoun" name="pronoun" class="form-control">
+    Pronoun position: <input type="number"  id="id_pronoun_pos" name="pronoun_pos" class="form-control">
+    <button type="button" id="select_pro">Select Pronoun</button><br/><br/>
+	<button type="button" id="process">Process</button> <br/><br/>
+        <button type="button" id="reset">Reset</button> <br/><br/>
+	</form>   
+</div>  
+	
+<div id="answer" style="color:blue;font-size:46px;">
+</div>
+</body>
